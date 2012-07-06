@@ -640,6 +640,23 @@
 				return false;
 			}
 		},
+        // experimental 
+        // !!
+        xdrData: function(url) {
+    		// Maintaining session by rewriting URL
+			// http://stackoverflow.com/questions/6453779/maintaining-session-by-rewriting-url
+			var match = /(?:^|;\s*)(JSESSIONID|PHPSESSID)=([^;]*)/.exec(document.cookie);
+			var data = {};
+			switch (match && match[1]) {
+			case "JSESSIONID":
+                data.JSESSIONID = match[2];			
+			case "PHPSESSID":
+                data.PHPSESSID = match[2];
+			default:
+				return false;
+			}
+            return data;
+		},
 		streamParser: function(chunk) {
 			// Chunks are formatted according to the event stream format 
 			// http://www.w3.org/TR/eventsource/#event-stream-interpretation
@@ -982,8 +999,9 @@
 						socket.fire("close", ["done"]);
 					};
 					
-					xdr.open("GET", url);
-					xdr.send();
+					xdr.open("POST", url);
+                    // experimental GruïckGruïckGruïck !
+					xdr.send(xdrData(jQuery.param(url)));
 				},
 				close: function() {
 					xdr.abort();
