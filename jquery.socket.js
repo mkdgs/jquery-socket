@@ -1001,7 +1001,7 @@
 					
 					xdr.open("POST", url);
                     // experimental GruïckGruïckGruïck !
-					xdr.send(xdrData(jQuery.param(url)));
+					xdr.send(jQuery.param(options.xdrData.call(socket, socket.session("url"))));
 				},
 				close: function() {
 					xdr.abort();
