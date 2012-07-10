@@ -7,8 +7,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 // This plugin is heavily based on Douglas Crockford's reference implementation
-(function($) {
-	
+(function($) {	
 	var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, 
 		meta = {
 			'\b' : '\\b',
@@ -18,8 +17,7 @@
 			'\r' : '\\r',
 			'"' : '\\"',
 			'\\' : '\\\\'
-		};
-	
+	};	
 	function quote(string) {
 		return '"' + string.replace(escapable, function(a) {
 			var c = meta[a];
@@ -626,7 +624,12 @@
 		},
 		inbound: $.parseJSON,
 		outbound: $.stringifyJSON,
+		// experimental 
+        // what's happend if my session is not called JSESSIONID|PHPSESSID ?!!
 		xdrURL: function(url) {
+			// experimental
+			// need to be true !?
+			return url;
 			// Maintaining session by rewriting URL
 			// http://stackoverflow.com/questions/6453779/maintaining-session-by-rewriting-url
 			var match = /(?:^|;\s*)(JSESSIONID|PHPSESSID)=([^;]*)/.exec(document.cookie);
@@ -640,21 +643,26 @@
 				return false;
 			}
 		},
-        // experimental 
-        // !!
-        xdrData: function(url) {
+        // experimental
+		// not work. because xdr send data without form POST header, value is not populated by server
+		// http://social.msdn.microsoft.com/Forums/eu/iewebdevelopment/thread/fe1570a0-8670-450d-90e6-1e03bd338569
+        // what's happend if my session is not called JSESSIONID|PHPSESSID ?!!
+		//
+        xdrData: function() {
     		// Maintaining session by rewriting URL
 			// http://stackoverflow.com/questions/6453779/maintaining-session-by-rewriting-url
 			var match = /(?:^|;\s*)(JSESSIONID|PHPSESSID)=([^;]*)/.exec(document.cookie);
-			var data = {};
+			var data = {};			
+			
+			
 			switch (match && match[1]) {
 			case "JSESSIONID":
                 data.JSESSIONID = match[2];			
 			case "PHPSESSID":
                 data.PHPSESSID = match[2];
-			default:
-				return false;
 			}
+			$4p.log('xdr data:');
+			$4p.log(data);
             return data;
 		},
 		streamParser: function(chunk) {
@@ -998,10 +1006,12 @@
 					xdr.onload = function() {
 						socket.fire("close", ["done"]);
 					};
-					
+					$4p.log('xdr to: '+url);
 					xdr.open("POST", url);
                     // experimental GruïckGruïckGruïck !
-					xdr.send(jQuery.param(options.xdrData.call(socket, socket.session("url"))));
+					$4p.log('data sent');
+					$4p.log(options.xdrData());
+					xdr.send(jQuery.param(options.xdrData()));
 				},
 				close: function() {
 					xdr.abort();
